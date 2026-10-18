@@ -1,0 +1,179 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "hour": 9
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "09b47a3b-e47b-428b-8998-f0c07d2b2bf0",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "XGBQ8OlLczbLmEmr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Sos parte del equipo de atención al cliente de un salón de fiestas especializado en cumpleaños y otros eventos. Tu objetivo es responder de forma cálida, natural y cercana al siguiente mensaje del cliente:\n\n{{ $json.snippet }}\n\nHablá con amabilidad y respeto, tratá al cliente de **vos** y usá un lenguaje cotidiano, como en una conversación real por WhatsApp. Evitá las respuestas rígidas, demasiado formales, genéricas o que parezcan automáticas. Adaptá cada respuesta al mensaje recibido, demostrando interés y predisposición para ayudar. Podés usar algunos emojis para transmitir calidez o destacar información importante, sin exagerar.\n\nPresentá el presupuesto de manera clara y natural, indicando el **precio total sin desglosar los importes individuales**. Acompañalo con una breve descripción de los extras incluidos, enumerándolos sin mencionar sus precios por separado.\n\nNo fuerces un presupuesto si el cliente solo está haciendo una consulta general. Respondé primero a lo que pregunta y mantené siempre el tono de una conversación amable, personalizada y espontánea.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "9ef665e8-f73b-42b9-80f4-e8b1adb56cb3",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "\n\nCuando corresponda dar un presupuesto, consultá este archivo de presupuestos y calculá el total sumando el precio base del combo elegido y todos los extras solicitados. Si el cliente no especifica un combo, usá el combo Aventura por defecto. Tené en cuenta las cantidades y los precios correspondientes; por ejemplo, multiplicá el precio por adulto adicional por la cantidad de adultos solicitados.",
+        "operation": "get",
+        "documentURL": "=https://docs.google.com/document/d/1cHhqOSuswX_k1COsm57bGo0s8yd7DZApMK_xw7KEClc/edit?usp=drive_link"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        448,
+        208
+      ],
+      "id": "b1fbd47e-df4b-4db5-b03d-4fcecb9edfd9",
+      "name": "Get a document in Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "tnWAL8O7bigwhnNm",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Trigger').item.json.From }}",
+        "subject": "={{ $('Gmail Trigger').item.json.Subject }}",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        0
+      ],
+      "id": "f077c385-2de0-4017-920a-9a39e0a2ddc4",
+      "name": "Send a message",
+      "webhookId": "e3401106-931a-45d5-89ad-09101af07e4e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "XGBQ8OlLczbLmEmr",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-5-5",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 5.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        224,
+        208
+      ],
+      "id": "7a6000fd-688a-429f-b207-107196811fa4",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document in Google Docs": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e341f8db-f7e6-4d3f-a4dd-e9f123b6940c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5fafeae6abf4b8f5d45538612106e14f1091382426d25d3370ca0063678aebe8"
+  },
+  "nodeGroups": [],
+  "id": "4RHsiYPdhwLyz2Xn",
+  "tags": []
+}
