@@ -1,0 +1,196 @@
+{
+  "name": "consultas de presupuesto",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Sos parte del equipo de atención al cliente de un salón de fiestas especializado en cumpleaños y otros eventos. Tu objetivo es responder de forma cálida, natural y cercana al siguiente mensaje del cliente:\n\n{{ $json.snippet }}\n\nHablá con amabilidad y respeto, tratá al cliente de **vos** y usá un lenguaje cotidiano, como en una conversación real por WhatsApp. Evitá las respuestas rígidas, demasiado formales, genéricas o que parezcan automáticas. Adaptá cada respuesta al mensaje recibido, demostrando interés y predisposición para ayudar. Podés usar algunos emojis para transmitir calidez o destacar información importante, sin exagerar.\n\nPresentá el presupuesto de manera clara y natural, indicando el **precio total sin desglosar los importes individuales**. Acompañalo con una breve descripción de los extras incluidos, enumerándolos sin mencionar sus precios por separado.\n\nNo fuerces un presupuesto si el cliente solo está haciendo una consulta general. Respondé primero a lo que pregunta y mantené siempre el tono de una conversación amable, personalizada y espontánea.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        656,
+        -128
+      ],
+      "id": "3cc47862-6d5a-4356-aa10-fbfd95a90f8f",
+      "name": "Agente para consulta de presupuestos",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0f6c256-d5a8-4cf3-9956-fbe694d9d754",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        -128
+      ],
+      "id": "5e38fcb3-839a-453d-b578-26c05220c442",
+      "name": "Return"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "snippet",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "id": "e822b67d-71de-45b8-a5ce-3a6485a95b61",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        448,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Cuando corresponda dar un presupuesto, consultá este archivo de presupuestos y calculá el total sumando el precio base del combo elegido y todos los extras solicitados. Si el cliente no especifica un combo, usá el combo Aventura por defecto. Tené en cuenta las cantidades y los precios correspondientes; por ejemplo, multiplicá el precio por adulto adicional por la cantidad de adultos solicitados.",
+        "operation": "get",
+        "documentURL": "=https://docs.google.com/document/d/1cHhqOSuswX_k1COsm57bGo0s8yd7DZApMK_xw7KEClc/edit?usp=drive_link"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        800,
+        64
+      ],
+      "id": "6b0bfec5-3b16-4575-ab32-74abf7295a6b",
+      "name": "Usar archivo de presupuestos",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "tnWAL8O7bigwhnNm",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"output\": \"Hubo un error en el procesamiento del email catalogado como pedido de presupuesto: {{ $json.error }}, por favor revise el email de forma manual.\"\n}\n ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1136,
+        32
+      ],
+      "id": "1a53b1da-e3f3-4996-a4b2-bcbcc12a1b79",
+      "name": "Return con error"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-5",
+          "cachedResultName": "Claude Sonnet 5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        656,
+        64
+      ],
+      "id": "13319016-7148-46df-8680-36773a580968",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Agente para consulta de presupuestos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente para consulta de presupuestos": {
+      "main": [
+        [
+          {
+            "node": "Return",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return con error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usar archivo de presupuestos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente para consulta de presupuestos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente para consulta de presupuestos",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "796713c4-d640-42cc-a373-b29fda60b434",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5fafeae6abf4b8f5d45538612106e14f1091382426d25d3370ca0063678aebe8"
+  },
+  "nodeGroups": [],
+  "id": "c1tSXPWJlx7RG2Ym",
+  "tags": []
+}

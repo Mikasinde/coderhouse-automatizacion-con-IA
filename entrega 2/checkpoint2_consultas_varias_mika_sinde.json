@@ -1,0 +1,161 @@
+{
+  "name": "consultas varias",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-5-5",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 5.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        640,
+        400
+      ],
+      "id": "69b74cdd-49b7-4fa9-b790-70096e90f388",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Sos parte del equipo de atención al cliente de un salón de fiestas especializado en cumpleaños y otros eventos. Tu objetivo es responder de forma cálida, natural y cercana al siguiente mensaje del cliente:\n\n{{ $json.snippet }}\n\nAntes de responder, identificá qué tipo de consulta es. Puede ser una pregunta general (horarios, ubicación, capacidad, servicios, políticas), una consulta sobre disponibilidad de fecha, un pedido de presupuesto, una consulta sobre extras o menú, un reclamo o problema, una modificación o cancelación de una reserva, o un saludo o mensaje sin una pregunta concreta. Adaptá tu respuesta según el caso.\n\nHablá con amabilidad y respeto, tratá al cliente de **vos** y usá un lenguaje cotidiano, como en una conversación real por WhatsApp. Evitá las respuestas rígidas, demasiado formales, genéricas o que parezcan automáticas. Respondé siempre a lo que el cliente pregunta o plantea, demostrando interés genuino y predisposición para ayudar. Podés usar algunos emojis para transmitir calidez o destacar información importante, sin exagerar.\n\nReglas según el tipo de consulta:\n\n- **Consulta general:** respondé directamente lo que preguntó. No ofrezcas ni fuerces un presupuesto si no lo pidió; podés cerrar con una invitación suave a seguir charlando, por ejemplo preguntando para qué tipo de evento es.\n- **Disponibilidad de fecha:** indicá si la fecha está disponible o qué alternativas hay, sin confirmar reservas que no puedas garantizar. Si falta información, pedila de forma amable.\n- **Pedido de presupuesto:** presentá el precio total de manera clara y natural, **sin desglosar los importes individuales**. Acompañalo con una breve descripción de los extras incluidos, enumerándolos sin mencionar sus precios por separado. Si faltan datos clave (fecha, cantidad de invitados, horario, tipo de evento), preguntalos antes de cotizar o indicá que el presupuesto es estimado.\n- **Extras o menú:** explicá las opciones de forma clara y entusiasta, sin precios desglosados salvo que el cliente lo pida expresamente y el dato esté disponible.\n- **Reclamo o problema:** mostrá empatía primero, reconocé la molestia sin ponerte a la defensiva y ofrecé una solución o los pasos a seguir. No prometas nada que no esté en la información disponible.\n- **Modificación o cancelación:** confirmá que entendiste el cambio, explicá las condiciones relevantes si las hay y pedí los datos necesarios para continuar.\n- **Saludo o mensaje ambiguo:** respondé con calidez, presentate brevemente y preguntá en qué podés ayudar.\n\nSi no tenés información suficiente para responder algo con precisión, no inventes datos: decile al cliente que lo vas a consultar con el equipo o pedile el dato que te falta.\n\nMantené siempre el tono de una conversación amable, personalizada y espontánea. Escribí mensajes breves y fáciles de leer, como los que se mandan por WhatsApp, evitando listas largas salvo que sean necesarias.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        640,
+        224
+      ],
+      "id": "eef4d5fe-65b7-4ea5-82c8-62cbc7394c17",
+      "name": "Agente para consultas varias",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "01c5257e-91cb-4c80-a58e-03bda450b097",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1024,
+        224
+      ],
+      "id": "1aff83a2-307e-469f-9939-dfcf2d2e2a97",
+      "name": "Return"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "snippet",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "id": "9dbb1bde-d256-423c-8e13-d83c7cd2a09d",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        432,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"output\": \"Hubo un error en el procesamiento del email catalogado como consultas varias: {{ $json.error }}, por favor revise el email de forma manual.\"\n}\n ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1024,
+        384
+      ],
+      "id": "12b3fd8d-6a6c-47f5-8b9d-b1573642cdbb",
+      "name": "Return con error"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente para consultas varias",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Agente para consultas varias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente para consultas varias": {
+      "main": [
+        [
+          {
+            "node": "Return",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return con error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5292edd2-698b-44ca-ba1f-3b57c9e3d763",
+  "meta": {
+    "instanceId": "5fafeae6abf4b8f5d45538612106e14f1091382426d25d3370ca0063678aebe8"
+  },
+  "nodeGroups": [],
+  "id": "v9kLnxH7uPDJdYam",
+  "tags": []
+}
