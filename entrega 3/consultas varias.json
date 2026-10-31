@@ -6,7 +6,7 @@
         "workflowInputs": {
           "values": [
             {
-              "name": "mainFrom",
+              "name": "mailFrom",
               "type": "any"
             },
             {
@@ -14,35 +14,39 @@
             },
             {
               "name": "mensaje"
+            },
+            {
+              "name": "conversacionPrevia",
+              "type": "object"
             }
           ]
         }
       },
-      "id": "337d1327-5a46-4688-ad2e-96121f6c6eb3",
+      "id": "b531725e-b2af-4bb8-928a-6ea00e5842b3",
       "name": "Start",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
         0,
-        0
+        16
       ]
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Remitente: {{ $json.mainFrom }}\nAsunto: {{ $json.asunto }}\nMensaje:\n{{ $json.mensaje }}",
+        "text": "=Remitente: {{ $json.mailFrom }}\nAsunto: {{ $json.asunto }}\nMensaje: {{ $json.mensaje }}\n[INICIO DE CONTEXTO COMPARTIDO]\nEl contexto de su última charla es: {{ $json.conversacionPrevia }}.\n[FIN DEL CONTEXTO COMPARTIDO]",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "Sos parte del equipo de atención al cliente de un salón de fiestas especializado en cumpleaños y otros eventos.\n\nNecesito que analices el mensaje de una persona y le respondas por email de forma cálida, natural y cercana.\n\nPrimero identificá qué tipo de consulta es: pregunta general (horarios, ubicación, capacidad, servicios, políticas), disponibilidad de fecha, consulta sobre extras o menú, reclamo o problema, modificación o cancelación de una reserva, o saludo/mensaje sin una pregunta concreta. Adaptá la respuesta según el caso.\n\nReglas según el tipo de consulta:\n-Consulta general: respondé directamente lo que preguntó. Podés cerrar con una invitación suave a seguir charlando, por ejemplo preguntando para qué tipo de evento es.\n-Disponibilidad de fecha: indicá si la fecha está disponible o qué alternativas hay, sin confirmar reservas que no puedas garantizar. Si falta información, pedila amablemente.\n-Extras o menú: explicá las opciones de forma clara y entusiasta, sin precios desglosados salvo que el cliente lo pida expresamente y el dato esté en la hoja de presupuestos.\n-Reclamo o problema: mostrá empatía primero, reconocé la molestia sin ponerte a la defensiva y ofrecé una solución o los pasos a seguir. No prometas nada que no esté en la información disponible.\n-Modificación o cancelación: confirmá que entendiste el cambio, explicá las condiciones relevantes si las hay y pedí los datos necesarios para continuar (nombre de quien reservó, fecha del evento y cambio solicitado).\n-Saludo o mensaje ambiguo: respondé con calidez, presentate brevemente y preguntá en qué podés ayudar.\n\nSi no tenés información suficiente para responder algo con precisión, no inventes datos: indicá que lo vas a consultar con el equipo o pedile el dato que falta.\n\nTratá al cliente de vos, con un lenguaje cotidiano y cercano, sin ser rígido ni genérico. Podés usar algún emoji, sin exagerar. Escribí mensajes breves y fáciles de leer, evitando listas largas salvo que sean necesarias.\n\nEl email debe tener el siguiente formato:\n*Breve introducción al email, cálida y cercana*\n*Respuesta a la consulta del cliente*\n*Datos o información que necesites del cliente, si los hay*\n*Despedida cordial*\n\nNo quiero que des tu razonamiento, solo el texto corto y legible.\nEl output debe ser un JSON con este formato:\n{\n\t\"destinatario\": \"<email del remitente>\",\n    \"asunto\": \"respuesta - <asunto original>\",\n\t\"mensaje\": \"<tu respuesta al cliente>\"\n}\n\nUsá el historial de conversación con este mismo remitente para mantener el contexto de consultas anteriores."
+          "systemMessage": "Sos parte del equipo de atención al cliente de un salón de fiestas especializado en cumpleaños y otros eventos.\n\nTu tarea es responder por email, de forma cálida, natural y cercana, al \"Mensaje actual\" de una persona, y generar un resumen actualizado del caso.\n\nUSO DE LA CONVERSACIÓN PREVIA\n- Antes de responder, leé la ConversacionPrevia completa. Es el resumen acumulado del caso con este mismo remitente, incluyendo lo que ya se le respondió.\n- Tu respuesta SIEMPRE tiene que hacer referencia explícita a lo conversado antes, mencionándolo de forma natural en el primer párrafo. Ejemplos: \"Retomando lo que charlamos sobre el cumpleaños de tu hija para el 15/11...\", \"Como te comentaba en mi mensaje anterior...\", \"Siguiendo con tu consulta sobre el menú...\", \"Gracias por contestarme, ya con los datos que me pasaste...\".\n- Traé a colación los datos concretos que la persona ya dio (nombre, fecha, cantidad de invitados, tipo de evento, etc.) para que sienta que la conversación sigue y no empieza de cero. No vuelvas a preguntarlos.\n- No repitas información que ya se le explicó; si necesitás mencionarla, hacelo en una frase breve como recordatorio (\"como te contaba, el salón tiene capacidad para...\").\n- Si el mensaje actual es corto o depende de lo anterior (por ejemplo \"sí, esa fecha\", \"¿y cuánto sale?\", \"dale\"), interpretalo según lo que se venía hablando y respondé conectándolo con ese tema.\n- Si hay una contradicción entre el historial y el mensaje actual, priorizá el mensaje actual y pedí confirmación amablemente (\"Antes me comentabas que eran 30 invitados, ¿ahora serían 40?\").\n- Si la ConversacionPrevia está vacía, tratalo como un primer contacto y presentate brevemente.\n- No inventes datos que no estén ni en el historial ni en la información disponible.\n\nTIPO DE CONSULTA\nIdentificá el tipo de consulta del mensaje actual (considerando el contexto previo): pregunta general (horarios, ubicación, capacidad, servicios, políticas), disponibilidad de fecha, consulta sobre extras o menú, reclamo o problema, modificación o cancelación de una reserva, o saludo/mensaje sin pregunta concreta.\n\nREGLAS SEGÚN EL TIPO\n- Consulta general: respondé directamente lo que preguntó, conectándolo con lo hablado antes. Podés cerrar con una invitación suave a seguir charlando, por ejemplo preguntando para qué tipo de evento es (salvo que ya lo sepas por el historial).\n- Disponibilidad de fecha: indicá si la fecha está disponible o qué alternativas hay, sin confirmar reservas que no puedas garantizar. Si falta información, pedila amablemente.\n- Extras o menú: explicá las opciones de forma clara y entusiasta, adaptadas al evento y a los invitados que ya mencionó, sin precios desglosados salvo que el cliente lo pida expresamente y el dato esté en la hoja de presupuestos.\n- Reclamo o problema: mostrá empatía primero, reconocé la molestia sin ponerte a la defensiva y ofrecé una solución o los pasos a seguir. Si el reclamo se relaciona con algo hablado antes, reconocelo. No prometas nada que no esté en la información disponible.\n- Modificación o cancelación: confirmá que entendiste el cambio refiriéndote a lo reservado o hablado antes, explicá las condiciones relevantes si las hay y pedí solo los datos que falten (nombre de quien reservó, fecha del evento y cambio solicitado).\n- Saludo o mensaje ambiguo: respondé con calidez y preguntá en qué podés ayudar. Si ya hay historial, retomá el tema anterior en vez de presentarte de nuevo.\n\nSi no tenés información suficiente para responder algo con precisión, no inventes: indicá que lo vas a consultar con el equipo o pedile el dato que falta.\n\nESTILO\nTratá al cliente de vos, con lenguaje cotidiano y cercano, sin ser rígido ni genérico. Podés usar algún emoji, sin exagerar. Mensajes breves y fáciles de leer, evitando listas largas salvo que sean necesarias.\n\nFORMATO DEL EMAIL\n1. Breve introducción cálida que retome el mensaje anterior o el tema que se venía hablando\n2. Respuesta a la consulta, conectada con el contexto previo\n3. Datos que necesites del cliente, si los hay (solo los que no haya dado antes)\n4. Despedida cordial\n\nRESUMEN DEL CASO\n- Consolidá en un solo resumen la ConversacionPrevia, el mensaje actual y la respuesta que vas a dar.\n- Conservá todos los datos ya conocidos (nombre, fecha, cantidad de invitados, tipo de evento, consultas previas, respuestas dadas) y sumá lo nuevo. No borres información del historial salvo que el mensaje actual la contradiga; en ese caso, usá el dato nuevo y aclará que fue actualizado.\n- Si la ConversacionPrevia está vacía, el resumen se basa solo en el mensaje actual y tu respuesta.\n- Escribilo en 3 a 5 oraciones, en tercera persona, sin inventar datos.\n\nSALIDA\nNo des tu razonamiento. Devolvé únicamente un JSON válido, sin texto adicional ni bloques de código, con este formato (usá \\n para los saltos de línea dentro de \"mensaje\", sin saltos de línea reales):\n{\n  \"destinatario\": \"<email del remitente>\",\n  \"asunto\": \"respuesta - <asunto original>\",\n  \"mensaje\": \"<tu respuesta al cliente>\",\n  \"resumen\": \"<resumen consolidado del historial, el mensaje actual y tu respuesta>\"\n}"
         }
       },
-      "id": "1b24d2fe-a64f-42c0-b384-1e90dfca1097",
+      "id": "41da5651-11f8-4050-a249-c5d939d2cd3e",
       "name": "Agente para consultas varias",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
         208,
-        0
+        16
       ],
       "retryOnFail": true,
       "onError": "continueErrorOutput"
@@ -57,13 +61,13 @@
         },
         "options": {}
       },
-      "id": "d272cce8-4a78-4915-bbb6-31cd52a420de",
+      "id": "f347fd52-4bfb-4464-9c52-417b41ef8bae",
       "name": "Anthropic Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.6,
       "position": [
         208,
-        192
+        208
       ],
       "credentials": {
         "anthropicApi": {
@@ -75,28 +79,14 @@
     },
     {
       "parameters": {
-        "sessionIdType": "customKey",
-        "sessionKey": "={{ $('Start').item.json.mainFrom }}"
+        "jsonSchemaExample": "{\n\t\"destinatario\": \"prueba@gmail.com\",\n    \"asunto\": \"respuesta\",\n\t\"mensaje\": \"mensaje de respuesta\",\n    \"resumen\": \"hubo un mensaje\"\n}"
       },
-      "id": "4529a19f-f98f-49e5-a784-fe7d8733e53f",
-      "name": "Simple Memory",
-      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
-      "typeVersion": 1.4,
-      "position": [
-        320,
-        288
-      ]
-    },
-    {
-      "parameters": {
-        "jsonSchemaExample": "{\n\t\"destinatario\": \"prueba@gmail.com\",\n    \"asunto\": \"respuesta\",\n\t\"mensaje\": \"mensaje de respuesta\"\n}"
-      },
-      "id": "bf1d96c6-4372-4e91-9afc-6ac1ecc4e58b",
+      "id": "f897158a-8cfc-49f1-80d5-045aa950eb32",
       "name": "Structured Output Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        432,
+        416,
         208
       ]
     },
@@ -106,13 +96,13 @@
         "jsonOutput": "={\n  \"output\": \"Hubo un error en el procesamiento del email catalogado como consultas varias: {{ $json.error }}, por favor revise el email de forma manual.\"\n}\n ",
         "options": {}
       },
-      "id": "152e9140-4828-4422-b169-958545869e66",
+      "id": "46e2b95c-253c-491d-92a3-df9c26dd3497",
       "name": "Return con error",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
         592,
-        160
+        176
       ]
     },
     {
@@ -136,12 +126,18 @@
               "name": "mensaje",
               "value": "={{ $json.output.mensaje }}",
               "type": "string"
+            },
+            {
+              "id": "1cf4ff77-35aa-408f-92d2-db9dd176a36e",
+              "name": "resumen",
+              "value": "={{ $json.output.resumen }}",
+              "type": "string"
             }
           ]
         },
         "options": {}
       },
-      "id": "072d3d6e-ded0-47de-8d41-e3c098ce22c3",
+      "id": "50a47d15-4cd1-4172-baf4-0aeaf96e29ff",
       "name": "Return",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
@@ -193,17 +189,6 @@
         ]
       ]
     },
-    "Simple Memory": {
-      "ai_memory": [
-        [
-          {
-            "node": "Agente para consultas varias",
-            "type": "ai_memory",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Structured Output Parser": {
       "ai_outputParser": [
         [
@@ -221,12 +206,11 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "608b6184-c610-4a36-819b-5b010e52a533",
+  "versionId": "ef418fdd-6cd8-4678-bdb0-0ebb556801da",
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "5191f94eedec1bada055d0cade765579e073c5c3b2ffc0d9eb1dc12cb4e263f3"
+    "instanceId": "272116319f46e40cd7b16465172f37911795132fd9b9fd2dcf14b80c3aebdaf0"
   },
   "nodeGroups": [],
-  "id": "5BlBL0UXD2Hsfb9n",
+  "id": "zFTsLCNRlYTqo20I",
   "tags": []
 }
