@@ -1,0 +1,621 @@
+{
+  "name": "flujo principal",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "hour": 9
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "id": "28d23de1-d148-4143-a533-aba3479c4d95",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        352,
+        -112
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RrLozrQ5No1AivuE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.mailBody }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Reserva",
+              "description": "Si el cliente está queriendo reservar un evento, se debe categorizar como Reserva"
+            },
+            {
+              "category": "Presupuesto",
+              "description": "Si el cliente está consultando un presupuesto para  un evento debe ser categorizado como Presupuesto"
+            },
+            {
+              "category": "Consulta varia",
+              "description": "Cualquier consulta de cliente que no sea pidiendo un presupuesto"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3cec535b-c8c2-4a49-a1b7-36fbdafef852",
+      "name": "Text Classifier",
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        -144
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {}
+      },
+      "id": "75e31fec-ba3d-4a0a-9e34-647e5dc343b2",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        768,
+        128
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "MA5HL4Nzn54bIuvJ",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/MA5HL4Nzn54bIuvJ",
+          "cachedResultName": "Reservas de eventos"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "mailFrom": "={{ $json.mailSender }}",
+            "asunto": "={{ $json.mailSubject }}",
+            "mensaje": "={{ $json.mailBody }}"
+          },
+          "matchingColumns": [
+            "mailBody"
+          ],
+          "schema": [
+            {
+              "id": "mailFrom",
+              "displayName": "mailFrom",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "asunto",
+              "displayName": "asunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "794a4608-ab0d-417e-8bf7-74b852c36cae",
+      "name": "Call Reservas de eventos",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        1280,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "destinatario",
+              "value": "={{ $json.destinatario }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "asunto",
+              "value": "={{ $json.asunto }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "mensaje",
+              "value": "={{ $json.mensaje }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "21837481-6032-4c49-99f7-5ff48a1d9ca4",
+      "name": "Preparar respuesta",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1504,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Dj0cx8aPUuz2utFl",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Dj0cx8aPUuz2utFl",
+          "cachedResultName": "consultas de presupuesto"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "mailFrom": "={{ $('Limpiar datos iniciales').item.json.mailSender }}",
+            "asunto": "={{ $('Limpiar datos iniciales').item.json.mailSubject }}",
+            "mensaje": "={{ $('Limpiar datos iniciales').item.json.mailBody }}"
+          },
+          "matchingColumns": [
+            "mensaje"
+          ],
+          "schema": [
+            {
+              "id": "mailFrom",
+              "displayName": "mailFrom",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "asunto",
+              "displayName": "asunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "abe48a68-6883-41de-b406-43da73719179",
+      "name": "Call consultas de presupuesto",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        1280,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "5BlBL0UXD2Hsfb9n",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/5BlBL0UXD2Hsfb9n",
+          "cachedResultName": "consultas varias"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "mensaje": "={{ $json.mailBody }}",
+            "asunto": "={{ $('Limpiar datos iniciales').item.json.mailSubject }}",
+            "mainFrom": "={{ $('Limpiar datos iniciales').item.json.mailSender }}"
+          },
+          "matchingColumns": [
+            "snippet"
+          ],
+          "schema": [
+            {
+              "id": "mainFrom",
+              "displayName": "mainFrom",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "asunto",
+              "displayName": "asunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "bc1b86e6-3407-4c32-90c8-fa71d802523d",
+      "name": "Call consultas varias",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        1280,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "mikasinde03@gmail.com",
+        "subject": "Aprobación de respuesta",
+        "message": "=Hola!\nNecesito que autorices o rechaces esta operación.\nMensaje original:\n{{ $('Limpiar datos iniciales').item.json.mailBody }}\nLa respuesta generada por la IA es:\n{{ $json.mensaje }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Aprobar",
+            "disapproveLabel": "Rechazar"
+          }
+        },
+        "options": {}
+      },
+      "id": "c63c8817-a40c-4b9f-9cbb-64f6288114ea",
+      "name": "Aprobación humana",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1712,
+        48
+      ],
+      "webhookId": "2cb3fcbb-b6d6-4725-831c-dac15bcb24f8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RrLozrQ5No1AivuE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "ef6848c5-db65-403f-b2e2-1458e9a5c16e",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "07fe95e3-9bd6-4226-812c-3fdfe1712cce",
+      "name": "¿El humano aprobó la operación?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        1936,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Preparar respuesta').item.json.destinatario }}",
+        "subject": "={{ $('Preparar respuesta').item.json.asunto }}",
+        "message": "={{ $('Preparar respuesta').item.json.mensaje }}",
+        "options": {}
+      },
+      "id": "d5240972-5021-4280-b387-a6046d13bc7a",
+      "name": "Enviar respuesta",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2176,
+        32
+      ],
+      "webhookId": "5b2b540c-2090-480a-98ed-33d482604e8f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RrLozrQ5No1AivuE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "mikasinde03@gmail.com",
+        "subject": "Error en ejecución",
+        "emailType": "text",
+        "message": "El email pocesado tuvo un error, por favor revise el email y responda de forma manual",
+        "options": {}
+      },
+      "id": "61af90f8-c991-4ec2-b560-777c3eeef8f5",
+      "name": "Mensaje de error classifier",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        480
+      ],
+      "webhookId": "a3047fb7-f19d-4473-8888-7f741fd1032a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RrLozrQ5No1AivuE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0031f784-75a9-49d6-a58a-1709e2af5411",
+              "name": "ID",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "b266dedd-d6b8-465e-80e8-55c9e8608045",
+              "name": "mailSubject",
+              "value": "={{ $json.Subject }}",
+              "type": "string"
+            },
+            {
+              "id": "2ef86911-6d73-455f-baac-c6b106ebce55",
+              "name": "mailSender",
+              "value": "={{ $json.From }}",
+              "type": "string"
+            },
+            {
+              "id": "86090b87-9eba-4ddd-920c-f69f5384943c",
+              "name": "mailBody",
+              "value": "={{ $json.snippet }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fd7edead-d1d3-4b04-ae5e-8e9fa50cb98a",
+      "name": "Limpiar datos iniciales",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        576,
+        -112
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Limpiar datos iniciales",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Call Reservas de eventos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call consultas de presupuesto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call consultas varias",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensaje de error classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Reservas de eventos": {
+      "main": [
+        [
+          {
+            "node": "Preparar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar respuesta": {
+      "main": [
+        [
+          {
+            "node": "Aprobación humana",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call consultas de presupuesto": {
+      "main": [
+        [
+          {
+            "node": "Preparar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call consultas varias": {
+      "main": [
+        [
+          {
+            "node": "Preparar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aprobación humana": {
+      "main": [
+        [
+          {
+            "node": "¿El humano aprobó la operación?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿El humano aprobó la operación?": {
+      "main": [
+        [
+          {
+            "node": "Enviar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar datos iniciales": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8d4ee3b8-6b6f-461c-bb0c-8874df4be9f2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5191f94eedec1bada055d0cade765579e073c5c3b2ffc0d9eb1dc12cb4e263f3"
+  },
+  "nodeGroups": [],
+  "id": "OGjfURdSP4pMAnoj",
+  "tags": []
+}

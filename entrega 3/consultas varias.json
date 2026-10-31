@@ -1,0 +1,232 @@
+{
+  "name": "consultas varias",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "mainFrom",
+              "type": "any"
+            },
+            {
+              "name": "asunto"
+            },
+            {
+              "name": "mensaje"
+            }
+          ]
+        }
+      },
+      "id": "337d1327-5a46-4688-ad2e-96121f6c6eb3",
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Remitente: {{ $json.mainFrom }}\nAsunto: {{ $json.asunto }}\nMensaje:\n{{ $json.mensaje }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Sos parte del equipo de atención al cliente de un salón de fiestas especializado en cumpleaños y otros eventos.\n\nNecesito que analices el mensaje de una persona y le respondas por email de forma cálida, natural y cercana.\n\nPrimero identificá qué tipo de consulta es: pregunta general (horarios, ubicación, capacidad, servicios, políticas), disponibilidad de fecha, consulta sobre extras o menú, reclamo o problema, modificación o cancelación de una reserva, o saludo/mensaje sin una pregunta concreta. Adaptá la respuesta según el caso.\n\nReglas según el tipo de consulta:\n-Consulta general: respondé directamente lo que preguntó. Podés cerrar con una invitación suave a seguir charlando, por ejemplo preguntando para qué tipo de evento es.\n-Disponibilidad de fecha: indicá si la fecha está disponible o qué alternativas hay, sin confirmar reservas que no puedas garantizar. Si falta información, pedila amablemente.\n-Extras o menú: explicá las opciones de forma clara y entusiasta, sin precios desglosados salvo que el cliente lo pida expresamente y el dato esté en la hoja de presupuestos.\n-Reclamo o problema: mostrá empatía primero, reconocé la molestia sin ponerte a la defensiva y ofrecé una solución o los pasos a seguir. No prometas nada que no esté en la información disponible.\n-Modificación o cancelación: confirmá que entendiste el cambio, explicá las condiciones relevantes si las hay y pedí los datos necesarios para continuar (nombre de quien reservó, fecha del evento y cambio solicitado).\n-Saludo o mensaje ambiguo: respondé con calidez, presentate brevemente y preguntá en qué podés ayudar.\n\nSi no tenés información suficiente para responder algo con precisión, no inventes datos: indicá que lo vas a consultar con el equipo o pedile el dato que falta.\n\nTratá al cliente de vos, con un lenguaje cotidiano y cercano, sin ser rígido ni genérico. Podés usar algún emoji, sin exagerar. Escribí mensajes breves y fáciles de leer, evitando listas largas salvo que sean necesarias.\n\nEl email debe tener el siguiente formato:\n*Breve introducción al email, cálida y cercana*\n*Respuesta a la consulta del cliente*\n*Datos o información que necesites del cliente, si los hay*\n*Despedida cordial*\n\nNo quiero que des tu razonamiento, solo el texto corto y legible.\nEl output debe ser un JSON con este formato:\n{\n\t\"destinatario\": \"<email del remitente>\",\n    \"asunto\": \"respuesta - <asunto original>\",\n\t\"mensaje\": \"<tu respuesta al cliente>\"\n}\n\nUsá el historial de conversación con este mismo remitente para mantener el contexto de consultas anteriores."
+        }
+      },
+      "id": "1b24d2fe-a64f-42c0-b384-1e90dfca1097",
+      "name": "Agente para consultas varias",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {}
+      },
+      "id": "d272cce8-4a78-4915-bbb6-31cd52a420de",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        208,
+        192
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Start').item.json.mainFrom }}"
+      },
+      "id": "4529a19f-f98f-49e5-a784-fe7d8733e53f",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        320,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"destinatario\": \"prueba@gmail.com\",\n    \"asunto\": \"respuesta\",\n\t\"mensaje\": \"mensaje de respuesta\"\n}"
+      },
+      "id": "bf1d96c6-4372-4e91-9afc-6ac1ecc4e58b",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        432,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"output\": \"Hubo un error en el procesamiento del email catalogado como consultas varias: {{ $json.error }}, por favor revise el email de forma manual.\"\n}\n ",
+        "options": {}
+      },
+      "id": "152e9140-4828-4422-b169-958545869e66",
+      "name": "Return con error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        592,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "01c5257e-91cb-4c80-a58e-03bda450b097",
+              "name": "destinatario",
+              "value": "={{ $json.output.destinatario }}",
+              "type": "string"
+            },
+            {
+              "id": "e70fb27d-3755-4c3e-bc83-d9ecb902c92c",
+              "name": "asunto",
+              "value": "={{ $json.output.asunto }}",
+              "type": "string"
+            },
+            {
+              "id": "410e853d-318b-439a-a955-434ad730695f",
+              "name": "mensaje",
+              "value": "={{ $json.output.mensaje }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "072d3d6e-ded0-47de-8d41-e3c098ce22c3",
+      "name": "Return",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        0
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Agente para consultas varias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente para consultas varias": {
+      "main": [
+        [
+          {
+            "node": "Return",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return con error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente para consultas varias",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente para consultas varias",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Agente para consultas varias",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "608b6184-c610-4a36-819b-5b010e52a533",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5191f94eedec1bada055d0cade765579e073c5c3b2ffc0d9eb1dc12cb4e263f3"
+  },
+  "nodeGroups": [],
+  "id": "5BlBL0UXD2Hsfb9n",
+  "tags": []
+}

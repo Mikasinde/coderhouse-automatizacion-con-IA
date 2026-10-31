@@ -1,0 +1,266 @@
+{
+  "name": "consultas de presupuesto",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "mailFrom",
+              "type": "any"
+            },
+            {
+              "name": "asunto"
+            },
+            {
+              "name": "mensaje"
+            }
+          ]
+        }
+      },
+      "id": "c87896ac-9b9d-444a-986c-e96f399a8cda",
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analizá el siguiente email de un cliente que pide presupuesto y redactá la respuesta.\n\nRemitente: {{ $json.mailFrom }}\nAsunto: {{ $json.asunto }}\nMensaje del cliente:\n\"\"\"\n{{ $json.mensaje }}\n\"\"\"",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Sos parte del equipo de atención al cliente de un salón de fiestas especializado en cumpleaños y otros eventos.\n\nFecha de hoy: {{ $now.setZone('America/Buenos_Aires').toFormat('dd/MM/yyyy') }}\n\nNecesito que analices el mensaje de una persona que consulta por el presupuesto de un evento y le respondas con el costo total calculado según la hoja de presupuestos.\n\nDatos a identificar en el mensaje:\n-Combo: el combo que selecciona la persona, puede ser fantasía o aventura.\n-Fecha del evento: la fecha en la que se realizará el evento.\n-Adultos: la cantidad de adultos invitados al evento.\n-Niños: la cantidad de niños invitados al evento.\n-Extras: los extras que la persona quiera contratar para el evento.\n\nSi falta el dato del Combo, no se puede calcular el presupuesto, por lo que se debe redactar un email notificando el dato faltante y pidiendo que sea enviado nuevamente.\nSi faltan los datos de niños y/o adultos, se da por hecho que se respetan las cantidades de niños o adultos del combo elegido (no son datos necesarios).\nSi falta el dato de los extras, se debe dar por hecho que no está pidiendo ninguno (no es un dato necesario).\nSi la fecha del evento es anterior a la fecha de hoy, se debe considerar como dato no válido y avisarlo en el email. La fecha no es necesaria para calcular el presupuesto, pero si se informa y es inválida, hay que mencionarlo.\n\nSi no faltan datos necesarios se debe seguir el siguiente paso a paso:\n-Calcular el coste total en base a la hoja de presupuestos.\n-Redactar el cuerpo del email con el presupuesto.\n\nEn el email:\n-Indicá únicamente el precio total, sin desglosar los importes individuales.\n-Enumerá brevemente lo que incluye el combo y los extras elegidos, sin mencionar sus precios por separado.\n-Tratá al cliente de vos, con un tono cálido y cercano, sin ser rígido ni genérico. Podés usar algún emoji, sin exagerar.\n\nEl email debe tener el siguiente formato:\n*Breve introducción al email, cálida y cercana*\n*Datos faltantes si los hay*\n*Presupuesto total con detalle de lo que incluye*\n*Despedida cordial*\n\nSiempre consultá la herramienta del archivo de presupuestos antes de calcular un precio; nunca inventes precios.\nNo quiero que des tu razonamiento, solo el texto corto y legible.\n\nTu respuesta final debe tener exactamente estos tres campos:\n- destinatario: la dirección de email del remitente (solo el email, sin el nombre).\n- asunto: \"Respuesta - \" seguido del asunto original del email.\n- mensaje: el cuerpo completo del email de respuesta que redactaste (NO el mensaje original del cliente)."
+        }
+      },
+      "id": "7e790acb-b4f7-4d2a-a256-28d63eee35b6",
+      "name": "Agente para consulta de presupuestos",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {}
+      },
+      "id": "26a64242-85e8-4e8e-94d1-457c926249e3",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        208,
+        208
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Start').item.json.mailFrom }}"
+      },
+      "id": "74436e46-533a-48b4-a361-2ac95a0f57f5",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        304,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Cuando corresponda dar un presupuesto, consultá este archivo de presupuestos y calculá el total sumando el precio base del combo elegido y todos los extras solicitados. Si el cliente no especifica un combo, usá el combo Aventura por defecto. Tené en cuenta las cantidades y los precios correspondientes; por ejemplo, multiplicá el precio por adulto adicional por la cantidad de adultos solicitados.",
+        "operation": "get",
+        "documentURL": "=https://docs.google.com/document/d/1cHhqOSuswX_k1COsm57bGo0s8yd7DZApMK_xw7KEClc/edit?usp=drive_link"
+      },
+      "id": "ed5a1cbf-8a7a-4fec-b9eb-6a1ecfc0c64f",
+      "name": "Usar archivo de presupuestos",
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        400,
+        208
+      ],
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "n1IQ3SFLxcqGq4Fk",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"destinatario\": \"prueba@gmail.com\",\n    \"asunto\": \"respuesta\",\n\t\"mensaje\": \"mensaje de respuesta\"\n}"
+      },
+      "id": "7b1118d3-56ad-4657-b86c-11e6aae71232",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"output\": \"Hubo un error en el procesamiento del email catalogado como pedido de presupuesto: {{ $json.error }}, por favor revise el email de forma manual.\"\n}\n ",
+        "options": {}
+      },
+      "id": "a07f9c0a-dac2-459c-bb6b-5d15522266d3",
+      "name": "Return con error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        896,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "01c5257e-91cb-4c80-a58e-03bda450b097",
+              "name": "destinatario",
+              "value": "={{ $json.output.destinatario }}",
+              "type": "string"
+            },
+            {
+              "id": "e70fb27d-3755-4c3e-bc83-d9ecb902c92c",
+              "name": "asunto",
+              "value": "={{ $json.output.asunto }}",
+              "type": "string"
+            },
+            {
+              "id": "410e853d-318b-439a-a955-434ad730695f",
+              "name": "mensaje",
+              "value": "={{ $json.output.mensaje }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "35dbc134-4b18-494b-91fe-beb053f9e6fe",
+      "name": "Return",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        896,
+        -16
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Agente para consulta de presupuestos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente para consulta de presupuestos": {
+      "main": [
+        [
+          {
+            "node": "Return",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return con error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente para consulta de presupuestos",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente para consulta de presupuestos",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usar archivo de presupuestos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente para consulta de presupuestos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Agente para consulta de presupuestos",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "68cc06b5-c99b-4d06-bc99-742815ced922",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5191f94eedec1bada055d0cade765579e073c5c3b2ffc0d9eb1dc12cb4e263f3"
+  },
+  "nodeGroups": [],
+  "id": "Dj0cx8aPUuz2utFl",
+  "tags": []
+}

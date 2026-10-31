@@ -1,0 +1,551 @@
+{
+  "name": "Reservas de eventos",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "mailFrom",
+              "type": "any"
+            },
+            {
+              "name": "asunto"
+            },
+            {
+              "name": "mensaje"
+            }
+          ]
+        }
+      },
+      "id": "8f50bc00-9bdc-4344-8f7f-a283f6fdeff5",
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=REMITENTE: {{ $json.mailFrom }}\nASUNTO: {{ $json.asunto }}\nMENSAJE: {{ $json.mensaje }}\nFECHA DE HOY: {{ $now.format('yyyy-MM-dd') }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=Sos parte del equipo de atención al cliente de un salón de fiestas especializado en cumpleaños y otros eventos.\n\nNecesito que analices el mensaje y cargues en airtable el evento que la persona quiere reservar siendo la tabla del siguiente formato:\n-Evento: el código de evento que se define como:\ncombo pedido + persona que reserva + fecha del evento\n-Persona que reserva: nombre y apellido de la persona que reserva.\n-Teléfono: el teléfono de contacto de la persona.\n-Combo: el combo que selecciona la persona, puede ser fantasía o aventura.\n-Fecha del evento: la fecha en la que se realizará el evento.\n-Fecha de reserva: la fecha en la que se reservó el evento.\n-Adultos: la cantidad de adultos invitados al evento.\n-Niños: la cantidad de niños invitados al evento.\n-Extras: los extras que la persona quiera contratar para el evento (incluidas las horas extra, si corresponden).\n-Monto presupuestado: el monto que calcules (según la hoja de presupuestos) que va a costar el evento.\n-Monto abonado: el monto que la persona ya abonó, que en este caso será 0.\n-Descripción: resumen del evento pedido por el usuario.\n\nSi faltan los datos de Persona que reserva, Combo o Fecha del evento, el evento no puede ser reservado, por lo que no debe ser cargado y en su lugar se debe redactar un email notificando el/los datos faltantes y pidiendo que vuelvan a ser enviados.\nSi faltan los datos de niños y/o adultos, se da por hecho que se respetan las cantidades de niños o adultos del combo elegido (no son datos necesarios).\nSi falta el dato de los extras, se debe dar por hecho que no está pidiendo ninguno (no es un dato necesario).\nSi falta la duración del evento, se da por hecho que se respetan las horas del combo elegido (no es un dato necesario).\nSi la fecha del evento es anterior a la fecha de hoy, no se puede hacer el evento, por lo que se debe considerar como dato no válido.\n\nCálculo del monto presupuestado:\nUsar SIEMPRE la herramienta \"hoja de presupuestos\" para obtener los precios y lo que incluye cada combo. No usar valores de memoria ni inventar precios. Hacer el cálculo en este orden:\na) Precio básico del combo elegido.\nb) Horas extra: si la persona pide un evento de más horas que las incluidas en el combo, cobrar la diferencia como horas extra. Fórmula: (horas pedidas - horas incluidas en el combo) x precio de la hora extra. Ejemplo: si el combo incluye 3 horas y la persona lo pide por 5, son 2 horas extra. Si pide igual o menos horas que las del combo, no se cobra nada extra.\nc) Invitados extra: si los adultos superan los incluidos en el combo, cobrar el precio por adulto extra por cada adulto de más. Si los niños superan los incluidos, cobrar el precio por niño extra por cada niño de más.\nd) Extras pedidos (comida, bebida, show del robot) según corresponda a cada combo. No cobrar como extra algo que el combo ya incluye.\ne) Monto presupuestado = suma de a + b + c + d.\n\nLas horas extra deben figurar en el campo Extras (por ejemplo: \"2 horas extra\") y estar sumadas en el Monto presupuestado.\n\nSi no faltan datos necesarios se debe seguir el siguiente paso a paso:\n1. Armar el código del evento (combo pedido + persona que reserva + fecha del evento).\n2. Usar SIEMPRE la herramienta \"buscar evento\" con ese código para saber si ya existe un evento con código igual. No cargar nada en Airtable antes de haber usado esta herramienta.\n3. Si la herramienta encuentra un evento con el mismo código: el evento ya existía, por lo que NO se debe crear uno nuevo sino ACTUALIZARLO. Consultar la \"hoja de presupuestos\", recalcular el coste siguiendo el cálculo indicado arriba y usar la herramienta \"crear evento\" con el mismo código para actualizar el registro existente con los datos nuevos (mantener el Monto abonado y la Fecha de reserva que ya tenía el registro). Luego redactar un email notificando que el evento ya existía y que solo se actualizaron sus datos.\n4. Si la herramienta no encuentra ningún evento con ese código: consultar la \"hoja de presupuestos\", calcular el coste siguiendo el cálculo indicado arriba, usar la herramienta \"crear evento\" para cargar toda la información del evento en airtable y redactar un email notificando que el evento fue creado con éxito.\n\nEl email debe tener el siguiente formato:\n*Breve introducción al email de forma formal*\n*Datos faltantes si los hay*\n*Se informa que el evento ya existía y solo se actualizó, o que fue creado con éxito, o que no se pudo reservar*\n*Despedida formal*\n\nNo quiero que des tu razonamiento, solo el texto corto y legible.\nEl output debe ser de este formato:\n{\n\t\"destinatario\": {{ $json.mailFrom }},\n    \"asunto\": \"respuesta - \" {{ $json.asunto }},\n\t\"mensaje\": {{ $json.mensaje }}\n}"
+        }
+      },
+      "id": "6ac4dada-f62c-4c32-a215-6b123a2c8b6b",
+      "name": "Agente IA Reserva de eventos",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {}
+      },
+      "id": "1a434b4b-a75e-44bd-9c84-1c022b6a742b",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.6,
+      "position": [
+        208,
+        208
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Start').item.json.mailFrom }}"
+      },
+      "id": "4773e195-0298-4658-95ea-761d2703167c",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        256,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Cuando corresponda dar un presupuesto, consultá este archivo de presupuestos y calculá el total sumando el precio base del combo elegido y todos los extras solicitados. Si el cliente no especifica un combo, usá el combo Aventura por defecto. Tené en cuenta las cantidades y los precios correspondientes; por ejemplo, multiplicá el precio por adulto adicional por la cantidad de adultos solicitados.",
+        "operation": "get",
+        "documentURL": "=https://docs.google.com/document/d/1cHhqOSuswX_k1COsm57bGo0s8yd7DZApMK_xw7KEClc/edit?usp=drive_link"
+      },
+      "id": "df2e3b5a-3c3f-41b7-8611-109da2ade446",
+      "name": "Usar archivo de presupuestos",
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        368,
+        272
+      ],
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "n1IQ3SFLxcqGq4Fk",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Buscar en Airtable si ya existe un evento con el código de evento indicado (combo + persona que reserva + fecha del evento). Devuelve el registro existente si lo encuentra, o ningún resultado si no existe.",
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "applRknwzsxcyl6Z1",
+          "mode": "list",
+          "cachedResultName": "Reservas de Eventos",
+          "cachedResultUrl": "https://airtable.com/applRknwzsxcyl6Z1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblk9K5OIam375T0k",
+          "mode": "list",
+          "cachedResultName": "Eventos",
+          "cachedResultUrl": "https://airtable.com/applRknwzsxcyl6Z1/tblk9K5OIam375T0k"
+        },
+        "filterByFormula": "={Evento} = \"{{ $fromAI('codigo_evento', 'Código exacto del evento a buscar (combo + persona que reserva + fecha del evento)', 'string') }}\"",
+        "returnAll": false,
+        "limit": 5,
+        "options": {}
+      },
+      "id": "ca175a41-b987-4ac5-86b0-66fbb91afeb7",
+      "name": "buscar evento",
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        272
+      ],
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "A0D7V5gBNi6q0vkk",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"destinatario\": \"prueba@gmail.com\",\n    \"asunto\": \"respuesta\",\n\t\"mensaje\": \"mensaje de respuesta\"\n}"
+      },
+      "id": "64a7e8de-3a86-4db6-a998-4492e2ce8d60",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        768,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"output\": \"Hubo un error en el procesamiento del email catalogado como reserva de evento: {{ $json.error }}, por favor revise el email de forma manual.\"\n}\n ",
+        "options": {}
+      },
+      "id": "58642ca9-918c-4f05-9053-e45659633015",
+      "name": "Return con error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        960,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "556f3d8f-f49f-4dc6-95e4-8f27c3319b5a",
+              "name": "destinatario",
+              "value": "={{ $json.output.destinatario }}",
+              "type": "string"
+            },
+            {
+              "id": "af572e59-0bae-41f4-ad6b-7e08f5046bb9",
+              "name": "asunto",
+              "value": "={{ $json.output.asunto }}",
+              "type": "string"
+            },
+            {
+              "id": "01c5257e-91cb-4c80-a58e-03bda450b097",
+              "name": "mensaje",
+              "value": "={{ $json.output.mensaje }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3831b4f6-8807-4c82-82cf-613736d4cd9c",
+      "name": "Return",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Crear o actualizar el evento en Airtable usando el código de evento como clave. Si no existe un evento con ese código lo crea; si ya existe, actualiza sus datos. Usar solo después de haber usado buscar evento.",
+        "authentication": "airtableOAuth2Api",
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "applRknwzsxcyl6Z1",
+          "mode": "list",
+          "cachedResultName": "Reservas de Eventos",
+          "cachedResultUrl": "https://airtable.com/applRknwzsxcyl6Z1"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblk9K5OIam375T0k",
+          "mode": "list",
+          "cachedResultName": "Eventos",
+          "cachedResultUrl": "https://airtable.com/applRknwzsxcyl6Z1/tblk9K5OIam375T0k"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Evento": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Evento__using_to_match_', ``, 'string') }}",
+            "Persona que reserva": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Persona_que_reserva', ``, 'string') }}",
+            "Teléfono": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tel_fono', ``, 'string') }}",
+            "Fecha del evento": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha_del_evento', ``, 'string') }}",
+            "Fecha de reserva": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha_de_reserva', ``, 'string') }}",
+            "Adultos": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Adultos', ``, 'number') }}",
+            "Niños": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Ni_os', ``, 'number') }}",
+            "Extras": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Extras', ``, 'json') }}",
+            "Monto presupuestado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Monto_presupuestado', ``, 'number') }}",
+            "Monto abonado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Monto_abonado', ``, 'number') }}",
+            "Descripción": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Descripci_n', ``, 'string') }}",
+            "Combo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Combo', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Evento"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Evento",
+              "displayName": "Evento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Persona que reserva",
+              "displayName": "Persona que reserva",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Teléfono",
+              "displayName": "Teléfono",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Combo",
+              "displayName": "Combo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Fecha del evento",
+              "displayName": "Fecha del evento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Fecha de reserva",
+              "displayName": "Fecha de reserva",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Adultos",
+              "displayName": "Adultos",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Niños",
+              "displayName": "Niños",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Extras",
+              "displayName": "Extras",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "options": [
+                {
+                  "name": "Comida",
+                  "value": "Comida"
+                },
+                {
+                  "name": "Bebida",
+                  "value": "Bebida"
+                },
+                {
+                  "name": "Show del robot",
+                  "value": "Show del robot"
+                },
+                {
+                  "name": "Invitados extra",
+                  "value": "Invitados extra"
+                },
+                {
+                  "name": "Hora extra",
+                  "value": "Hora extra"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Monto presupuestado",
+              "displayName": "Monto presupuestado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Monto abonado",
+              "displayName": "Monto abonado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Descripción",
+              "displayName": "Descripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "1d656e53-9c56-42e1-b7d9-ad14c5dde6e0",
+      "name": "crear o actualizar evento",
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        272
+      ],
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "A0D7V5gBNi6q0vkk",
+          "name": "Airtable account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Agente IA Reserva de eventos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente IA Reserva de eventos": {
+      "main": [
+        [
+          {
+            "node": "Return",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return con error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente IA Reserva de eventos",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente IA Reserva de eventos",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Usar archivo de presupuestos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente IA Reserva de eventos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente IA Reserva de eventos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Agente IA Reserva de eventos",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crear o actualizar evento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente IA Reserva de eventos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "dd84f172-79ec-4123-a346-d58ccc5c8eea",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5191f94eedec1bada055d0cade765579e073c5c3b2ffc0d9eb1dc12cb4e263f3"
+  },
+  "nodeGroups": [],
+  "id": "MA5HL4Nzn54bIuvJ",
+  "tags": []
+}
