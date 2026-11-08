@@ -17,7 +17,7 @@
       "type": "n8n-nodes-base.gmailTrigger",
       "typeVersion": 1.4,
       "position": [
-        -464,
+        -432,
         0
       ],
       "credentials": {
@@ -149,12 +149,8 @@
         "categories": {
           "categories": [
             {
-              "category": "Presupuesto",
-              "description": "El remitente pide explícitamente un presupuesto, cotización, precio, tarifa o costo para contratar un evento o servicio (por ejemplo: boda, cumpleaños, evento corporativo, catering, alquiler de salón), o envía datos de un evento (fecha, cantidad de invitados, lugar) esperando recibir un precio. Solo elegir esta categoría si hay una intención clara de obtener un presupuesto."
-            },
-            {
-              "category": "Consulta varia",
-              "description": "Cualquier otro email que NO sea un pedido de presupuesto: consultas generales, disponibilidad, seguimiento, reclamos, agradecimientos, confirmaciones, y también newsletters, publicidad, promociones, notificaciones automáticas de bancos o servicios, spam o cualquier email que no encaje claramente en Presupuesto. Ante cualquier duda, elegir esta categoría."
+              "category": "Consulta",
+              "description": "Cualquier tipo de consulta, ya sea varia como del horario de atención al cliente o una reprogramación o un pedido de presupuesto"
             }
           ]
         },
@@ -170,8 +166,8 @@
       "type": "@n8n/n8n-nodes-langchain.textClassifier",
       "typeVersion": 1.1,
       "position": [
-        1040,
-        -48
+        992,
+        -32
       ],
       "onError": "continueErrorOutput"
     },
@@ -291,91 +287,6 @@
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "ck2oS6gdhpXjHDKN",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/ck2oS6gdhpXjHDKN",
-          "cachedResultName": "consultas de presupuesto"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "mailFrom": "={{ $('Limpiar datos iniciales').item.json.mailSender }}",
-            "asunto": "={{ $('Limpiar datos iniciales').item.json.mailSubject }}",
-            "mensaje": "={{ $('Limpiar datos iniciales').item.json.mailBody }}",
-            "conversacionPrevia": "={{ $json.fields }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "mailFrom",
-              "displayName": "mailFrom",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "asunto",
-              "displayName": "asunto",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "mensaje",
-              "displayName": "mensaje",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "sesionID",
-              "displayName": "sesionID",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": true
-            },
-            {
-              "id": "conversacionPrevia",
-              "displayName": "conversacionPrevia",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "object",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "options": {
-          "waitForSubWorkflow": true
-        }
-      },
-      "id": "2b642f8c-1599-4a4e-af2c-23bae149813e",
-      "name": "Call consultas de presupuesto",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.4,
-      "position": [
-        1440,
-        -96
-      ]
-    },
-    {
-      "parameters": {
         "assignments": {
           "assignments": [
             {
@@ -411,8 +322,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        1728,
-        16
+        1584,
+        -48
       ]
     },
     {
@@ -435,8 +346,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1952,
-        16
+        1792,
+        -48
       ],
       "webhookId": "9c05fef0-c833-4d62-ab89-3eabf3dee69d",
       "credentials": {
@@ -476,8 +387,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.4,
       "position": [
-        2144,
-        16
+        1984,
+        -48
       ]
     },
     {
@@ -493,8 +404,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        2640,
-        0
+        2448,
+        -64
       ],
       "webhookId": "6fad8129-5b14-41f1-ab3f-77d61a5fd299",
       "credentials": {
@@ -511,7 +422,7 @@
           "value": "AjKiCG8iMqu6Phgc",
           "mode": "list",
           "cachedResultUrl": "/workflow/AjKiCG8iMqu6Phgc",
-          "cachedResultName": "consultas varias"
+          "cachedResultName": "Consultas"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
@@ -569,8 +480,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.4,
       "position": [
-        1440,
-        128
+        1376,
+        -48
       ]
     },
     {
@@ -586,8 +497,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1440,
-        336
+        1376,
+        176
       ],
       "webhookId": "14df5334-3b88-4ca0-83a3-35b81bd19740",
       "credentials": {
@@ -714,8 +625,8 @@
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
       "position": [
-        2416,
-        0
+        2224,
+        -64
       ],
       "credentials": {
         "airtableOAuth2Api": {
@@ -769,7 +680,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.4,
       "position": [
-        -272,
+        -240,
         0
       ],
       "id": "1b09619f-4252-4483-b262-d5b8c7eded01",
@@ -791,8 +702,8 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.7,
       "position": [
-        1664,
-        336
+        1600,
+        176
       ],
       "id": "e1f04cad-a349-4913-aa4d-7638df77411e",
       "name": "Notificar error por slack",
@@ -820,8 +731,8 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.7,
       "position": [
-        2864,
-        0
+        2672,
+        -64
       ],
       "id": "605c3305-c538-4591-b374-0a31e0b8094c",
       "name": "Notificar finalizacion de poceso por slack",
@@ -848,8 +759,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.6,
       "position": [
-        1040,
-        176
+        992,
+        192
       ],
       "credentials": {
         "anthropicApi": {
@@ -875,8 +786,8 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.7,
       "position": [
-        2416,
-        192
+        2224,
+        128
       ],
       "id": "454240a8-17a3-42d2-b2b1-62306e944574",
       "name": "Notificar rechazo de respuesta por slack",
@@ -968,13 +879,6 @@
       "main": [
         [
           {
-            "node": "Call consultas de presupuesto",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
             "node": "Call consultas varias",
             "type": "main",
             "index": 0
@@ -986,7 +890,8 @@
             "type": "main",
             "index": 0
           }
-        ]
+        ],
+        []
       ]
     },
     "Crear registro de cliente": {
@@ -994,17 +899,6 @@
         [
           {
             "node": "Clasificar email",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Call consultas de presupuesto": {
-      "main": [
-        [
-          {
-            "node": "Preparar respuesta",
             "type": "main",
             "index": 0
           }
@@ -1134,7 +1028,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "5f5f523d-379b-4bf5-b356-792fd4bf9063",
+  "versionId": "bae0fcb5-2f0c-4f41-ab43-8bff77caa32c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8fc55d931d612b2472d3a592d83eadb0d1dc959b4c0a351820f0c589755f63a0"
