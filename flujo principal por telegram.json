@@ -1,0 +1,638 @@
+{
+  "name": "flujo principal por telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "29c98747-2782-4dce-9952-a9adc967655e",
+              "leftValue": "={{ $json.message.voice }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        176,
+        0
+      ],
+      "id": "1d275b14-e4dc-4c98-8f02-16b8e213e982",
+      "name": "¿Es mensaje de voz?"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "26adabcc-cd4f-468c-8b6c-a5dad0cfbb00",
+      "name": "Llega mensaje de telegram",
+      "webhookId": "8a3de65d-8a79-4fd8-ab65-589a51915afc",
+      "credentials": {
+        "telegramApi": {
+          "id": "uXhX1uf6uqDPord6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.mensaje }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        -224
+      ],
+      "id": "8da5890c-b0d1-43c2-9c36-d703cdf3c2da",
+      "name": "Descargo audio",
+      "webhookId": "eed4bd5e-90a0-452e-9545-448642f258e1",
+      "credentials": {
+        "telegramApi": {
+          "id": "uXhX1uf6uqDPord6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f01db23d-9d5a-43e5-8bdd-f737d2e0ac73",
+              "name": "mensaje",
+              "value": "={{ $json.message.voice.file_id }}",
+              "type": "string"
+            },
+            {
+              "id": "49a4b983-8e28-471d-9349-1f4d99d50f0d",
+              "name": "duracion",
+              "value": "={{ $json.message.voice.duration }}",
+              "type": "number"
+            },
+            {
+              "id": "f16327e9-87de-41fa-bdfb-da69c5d7b36d",
+              "name": "lenguaje",
+              "value": "={{ $json.message.from.language_code }}",
+              "type": "string"
+            },
+            {
+              "id": "f81db8ee-d271-473a-945a-680a3431e0e3",
+              "name": "usuario",
+              "value": "={{ $json.message.chat.first_name }} {{ $json.message.chat.last_name }}",
+              "type": "string"
+            },
+            {
+              "id": "abcd63c2-3a10-4db1-8d34-7b575922666b",
+              "name": "chatID",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        384,
+        -80
+      ],
+      "id": "d421446e-cda6-4b36-869f-cbe66b67ab1d",
+      "name": "Limpiar datos para descarga de audio"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1d373e93-8aa1-4ab4-ab57-22b114f790c6",
+              "name": "mensaje",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "3528e1f7-7bdd-4819-b08c-7d5f62796a43",
+              "name": "usuario",
+              "value": "={{ $('Limpiar datos para descarga de audio').item.json.usuario }}",
+              "type": "string"
+            },
+            {
+              "id": "af8ae8a4-45ab-48e9-835b-51856ecbfaef",
+              "name": "chatID",
+              "value": "={{ $('Llega mensaje de telegram').item.json.message.chat.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1632,
+        -240
+      ],
+      "id": "d86ec56b-9657-43d5-b093-8c6a0a88ce59",
+      "name": "limpiar datos para procesamiento"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Limpiar datos para descarga de audio').item.json.chatID }}",
+        "text": "El audio enviado es demasiado corto para ser procesado.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1392,
+        -64
+      ],
+      "id": "4b72d20b-0c3c-4ef3-a3d2-c1edf5e78548",
+      "name": "notificar mensaje invalido",
+      "webhookId": "56e3c9f9-43f7-4c29-a37b-6c0a217d7a09",
+      "credentials": {
+        "telegramApi": {
+          "id": "uXhX1uf6uqDPord6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {
+          "language": "={{ $('Limpiar datos para descarga de audio').item.json.lenguaje }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        944,
+        -224
+      ],
+      "id": "5d51ac1e-39f8-4e10-8b73-e811f89204b1",
+      "name": "transcribir audio a texto",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "09ca70c0-321b-43a4-8f4e-93dac2ee659a",
+              "leftValue": "={{ $json.duracion }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        576,
+        -80
+      ],
+      "id": "cb9c88c6-76dd-4722-87ee-f07677b88401",
+      "name": "¿La duración es mayor a 2 segundos?"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "edrV8C81goHvyX8w",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/edrV8C81goHvyX8w",
+          "cachedResultName": "consultas por telegram"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "mensaje": "={{ $json.mensaje }}"
+          },
+          "matchingColumns": [
+            "mensaje"
+          ],
+          "schema": [
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        2096,
+        96
+      ],
+      "id": "32a5b43c-6085-401c-8553-0000bf906ca9",
+      "name": "Consultas por telegram"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "08aecd8c-ef56-401e-ba3d-05a50d7d90b8",
+              "name": "mensaje",
+              "value": "={{ $json.mensaje }}{{ $('Llega mensaje de telegram').item.json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "2295db26-74f8-45ce-a22a-a6c4e61e0f01",
+              "name": "chatID",
+              "value": "={{ $json.chatID }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1904,
+        96
+      ],
+      "id": "b8b52b31-d7e5-48df-9801-3beb2ddb1d20",
+      "name": "Unificar datos para procesamiento"
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "voice": {
+          "__rl": true,
+          "value": "hpp4J3VqNfWAUOO0d1Us",
+          "mode": "list",
+          "cachedResultName": "Bella - Professional, Bright, Warm"
+        },
+        "text": "={{ $json.mensaje }}",
+        "additionalOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        2288,
+        96
+      ],
+      "id": "ad4c595d-7e54-45ad-ac59-aab18ea4311e",
+      "name": "Convertir mensaje en audio para telegram",
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "3ThqIjSrJUTTE9bJ",
+          "name": "ElevenLabs account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c9093110-6f47-4502-aad1-d9cb5538ee2d",
+              "name": "mensaje",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "0adcf481-ff6c-491b-8e32-9dfe07c1357f",
+              "name": "usuario",
+              "value": "={{ $json.message.from.first_name }} {{ $json.message.from.last_name }}",
+              "type": "string"
+            },
+            {
+              "id": "89342279-a939-4497-8c1c-7e011b28c349",
+              "name": "chatID",
+              "value": "={{ $('Llega mensaje de telegram').item.json.message.chat.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        384,
+        96
+      ],
+      "id": "109fe683-b57b-48ba-8cf5-3f098230cd25",
+      "name": "Limpiar datos para mensaje de texto"
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Unificar datos para procesamiento').item.json.chatID }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2480,
+        96
+      ],
+      "id": "4840e6c5-90d3-452b-b8cc-49807f2e2a87",
+      "name": "Enviar el audio de respuesta",
+      "webhookId": "3aa4a31e-40ab-478f-ad22-7653e943a2b0",
+      "credentials": {
+        "telegramApi": {
+          "id": "uXhX1uf6uqDPord6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteMessage",
+        "chatId": "={{ $('Llega mensaje de telegram').item.json.message.chat.id }}",
+        "messageId": "={{ $('Llega mensaje de telegram').item.json.message.message_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1392,
+        -240
+      ],
+      "id": "3d943913-4f6b-4fca-9082-6e9755d927c0",
+      "name": "Eliminar audio del cliente por privacidad",
+      "webhookId": "98ee0c85-9923-4939-bc37-cfd0387f7760",
+      "credentials": {
+        "telegramApi": {
+          "id": "uXhX1uf6uqDPord6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "335c2e8d-85a2-4ff2-a970-0fb051526dcc",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        1152,
+        -224
+      ],
+      "id": "faad03b3-7199-4250-a7bb-351e2fb0163c",
+      "name": "¿La transcripción no es vacía?"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "¿Es mensaje de voz?": {
+      "main": [
+        [
+          {
+            "node": "Limpiar datos para descarga de audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Limpiar datos para mensaje de texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Llega mensaje de telegram": {
+      "main": [
+        [
+          {
+            "node": "¿Es mensaje de voz?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargo audio": {
+      "main": [
+        [
+          {
+            "node": "transcribir audio a texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar datos para descarga de audio": {
+      "main": [
+        [
+          {
+            "node": "¿La duración es mayor a 2 segundos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "limpiar datos para procesamiento": {
+      "main": [
+        [
+          {
+            "node": "Unificar datos para procesamiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "transcribir audio a texto": {
+      "main": [
+        [
+          {
+            "node": "¿La transcripción no es vacía?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿La duración es mayor a 2 segundos?": {
+      "main": [
+        [
+          {
+            "node": "Descargo audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "notificar mensaje invalido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultas por telegram": {
+      "main": [
+        [
+          {
+            "node": "Convertir mensaje en audio para telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unificar datos para procesamiento": {
+      "main": [
+        [
+          {
+            "node": "Consultas por telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convertir mensaje en audio para telegram": {
+      "main": [
+        [
+          {
+            "node": "Enviar el audio de respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar datos para mensaje de texto": {
+      "main": [
+        [
+          {
+            "node": "Unificar datos para procesamiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eliminar audio del cliente por privacidad": {
+      "main": [
+        [
+          {
+            "node": "limpiar datos para procesamiento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿La transcripción no es vacía?": {
+      "main": [
+        [
+          {
+            "node": "Eliminar audio del cliente por privacidad",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "notificar mensaje invalido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "96f2cbde-7485-4f9e-aa00-669117de6501",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8943d81c84d326c9f56af9333a76639c571c7c8ea908928439819030b326fcdb"
+  },
+  "nodeGroups": [],
+  "id": "pPtxxkIMcVWKdQAK",
+  "tags": []
+}

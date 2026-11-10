@@ -1,5 +1,5 @@
 {
-  "name": "flujo principal",
+  "name": "flujo principal con gmail",
   "nodes": [
     {
       "parameters": {
@@ -12,17 +12,17 @@
         },
         "filters": {}
       },
-      "id": "53549973-09f1-4811-a072-9e9127372173",
+      "id": "5d9cc7f9-d28f-496b-b5ef-5659ce2ff287",
       "name": "Recibir emails",
       "type": "n8n-nodes-base.gmailTrigger",
       "typeVersion": 1.4,
       "position": [
-        -432,
-        0
+        -640,
+        -176
       ],
       "credentials": {
         "gmailOAuth2": {
-          "id": "Iz3RuTfgvH9cpQ7J",
+          "id": "65zrtrRlACeNraUN",
           "name": "Gmail account"
         }
       }
@@ -53,13 +53,13 @@
         },
         "options": {}
       },
-      "id": "37eb25eb-5e9a-45ab-8a50-966944e85a7f",
+      "id": "a20c85dd-3de1-45dd-bca9-93185d553ab3",
       "name": "Limpiar datos iniciales",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        -16,
-        -16
+        -224,
+        -192
       ]
     },
     {
@@ -93,18 +93,18 @@
           ]
         }
       },
-      "id": "f1f1fe62-39b8-42aa-8f90-fe1152dd6db3",
+      "id": "98f7fd53-e6f8-461b-93de-327ed2f4a6e0",
       "name": "buscar conversaciones anteriores",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
       "position": [
-        352,
-        -16
+        144,
+        -192
       ],
       "alwaysOutputData": true,
       "credentials": {
         "airtableOAuth2Api": {
-          "id": "bxsXAdCCUorrivz5",
+          "id": "66PUUEqqmVTPkNL4",
           "name": "Airtable account"
         }
       }
@@ -134,42 +134,14 @@
         },
         "options": {}
       },
-      "id": "bc295577-553b-4ab4-9f6d-85506f8baf15",
+      "id": "4c13560a-8c5a-47c6-866f-a1c809ead905",
       "name": "¿Hay conversaciones previas?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.4,
       "position": [
-        528,
-        -16
+        320,
+        -192
       ]
-    },
-    {
-      "parameters": {
-        "inputText": "=remitente: {{ $('Limpiar datos iniciales').item.json.mailSender }}\nasunto: {{ $('Limpiar datos iniciales').item.json.mailSubject }}\nmensaje: {{ $('Limpiar datos iniciales').item.json.mailBody }}",
-        "categories": {
-          "categories": [
-            {
-              "category": "Consulta",
-              "description": "Cualquier tipo de consulta, ya sea varia como del horario de atención al cliente o una reprogramación o un pedido de presupuesto"
-            }
-          ]
-        },
-        "options": {
-          "multiClass": false,
-          "fallback": "discard",
-          "systemPromptTemplate": "Sos un clasificador de emails entrantes de una empresa de organización de eventos. Clasificá el email del usuario en EXACTAMENTE UNA de estas categorías: {categories}.\n\nReglas obligatorias:\n- Debés marcar exactamente una categoría como true y todas las demás como false. Nunca dejes todas en false.\n- Elegí \"Presupuesto\" solo si el remitente pide claramente un precio, cotización o presupuesto para un evento o servicio.\n- En cualquier otro caso (incluyendo publicidad, newsletters, notificaciones automáticas, spam o emails ambiguos) elegí \"Consulta varia\".\n- Basate en el asunto y el mensaje; el remitente y el ID son solo contexto.\n\nSeguí las instrucciones de formato a continuación. No expliques nada y respondé solo con el JSON.",
-          "enableAutoFixing": true
-        }
-      },
-      "id": "7a6963a8-4097-4052-ba5c-eedef3a61c15",
-      "name": "Clasificar email",
-      "type": "@n8n/n8n-nodes-langchain.textClassifier",
-      "typeVersion": 1.1,
-      "position": [
-        992,
-        -32
-      ],
-      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -270,17 +242,17 @@
         },
         "options": {}
       },
-      "id": "cc5cadce-7e7d-435b-b026-4d57beb5c4d3",
+      "id": "6b620435-a1f2-4a7c-b69e-01af93c07e53",
       "name": "Crear registro de cliente",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
       "position": [
-        752,
-        64
+        544,
+        -112
       ],
       "credentials": {
         "airtableOAuth2Api": {
-          "id": "bxsXAdCCUorrivz5",
+          "id": "66PUUEqqmVTPkNL4",
           "name": "Airtable account"
         }
       }
@@ -317,13 +289,13 @@
         },
         "options": {}
       },
-      "id": "5a81c82f-921c-42c5-953e-29f244724956",
+      "id": "20dd6bf5-6d43-41a5-af1c-af56205d4bb6",
       "name": "Preparar respuesta",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        1584,
-        -48
+        976,
+        -208
       ]
     },
     {
@@ -341,18 +313,18 @@
         },
         "options": {}
       },
-      "id": "2c4912ba-6155-4e8b-95fd-26f4fbcf499e",
+      "id": "fbdc51d7-ed2e-429f-a8f0-e55b34276d97",
       "name": "Pedir autorización humana",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1792,
-        -48
+        1184,
+        -208
       ],
       "webhookId": "9c05fef0-c833-4d62-ab89-3eabf3dee69d",
       "credentials": {
         "gmailOAuth2": {
-          "id": "Iz3RuTfgvH9cpQ7J",
+          "id": "65zrtrRlACeNraUN",
           "name": "Gmail account"
         }
       }
@@ -382,13 +354,13 @@
         },
         "options": {}
       },
-      "id": "4a5b77ff-c710-4532-ae79-b16c8d4752d4",
+      "id": "8ec162ed-1a9c-47fc-a8f0-e3ffea9fa760",
       "name": "La respuesta de la IA fue aprobada",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.4,
       "position": [
-        1984,
-        -48
+        1376,
+        -208
       ]
     },
     {
@@ -399,18 +371,18 @@
         "message": "={{ $('Preparar respuesta').item.json.mensaje }}",
         "options": {}
       },
-      "id": "f80d4c18-6acf-4d2b-b020-b9d324894dd9",
+      "id": "87e77d28-495f-439c-a6f9-d6612024eb56",
       "name": "Enviar respuesta al cliente",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        2448,
-        -64
+        1840,
+        -224
       ],
       "webhookId": "6fad8129-5b14-41f1-ab3f-77d61a5fd299",
       "credentials": {
         "gmailOAuth2": {
-          "id": "Iz3RuTfgvH9cpQ7J",
+          "id": "65zrtrRlACeNraUN",
           "name": "Gmail account"
         }
       }
@@ -419,10 +391,10 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "AjKiCG8iMqu6Phgc",
+          "value": "SFh2RCF5fWcDD6o8",
           "mode": "list",
-          "cachedResultUrl": "/workflow/AjKiCG8iMqu6Phgc",
-          "cachedResultName": "Consultas"
+          "cachedResultUrl": "/workflow/SFh2RCF5fWcDD6o8",
+          "cachedResultName": "Consultas por gmail"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
@@ -475,38 +447,14 @@
         },
         "options": {}
       },
-      "id": "1c63a2d1-005f-480a-9b8f-41b9ee87850b",
+      "id": "f346088b-b746-4182-986d-9fdae93f6a70",
       "name": "Call consultas varias",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.4,
       "position": [
-        1376,
-        -48
+        752,
+        -192
       ]
-    },
-    {
-      "parameters": {
-        "sendTo": "mikasinde03@gmail.com",
-        "subject": "Error en ejecución",
-        "emailType": "text",
-        "message": "El email pocesado tuvo un error, por favor revise el email y responda de forma manual",
-        "options": {}
-      },
-      "id": "2af45a66-05d3-4ada-99fc-f5176baa531b",
-      "name": "Mensaje de error classifier",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        1376,
-        176
-      ],
-      "webhookId": "14df5334-3b88-4ca0-83a3-35b81bd19740",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "Iz3RuTfgvH9cpQ7J",
-          "name": "Gmail account"
-        }
-      }
     },
     {
       "parameters": {
@@ -620,17 +568,17 @@
         },
         "options": {}
       },
-      "id": "a07eda3e-ff9b-43d9-a5c9-210e90321df8",
+      "id": "bb18857e-7a29-44a8-b258-f20f5ec11867",
       "name": "Actualizar registro con mensaje",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
       "position": [
-        2224,
-        -64
+        1616,
+        -224
       ],
       "credentials": {
         "airtableOAuth2Api": {
-          "id": "bxsXAdCCUorrivz5",
+          "id": "66PUUEqqmVTPkNL4",
           "name": "Airtable account"
         }
       }
@@ -680,40 +628,11 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.4,
       "position": [
-        -240,
-        0
+        -448,
+        -176
       ],
-      "id": "1b09619f-4252-4483-b262-d5b8c7eded01",
+      "id": "cb6a00bf-cebe-45df-b6c1-c978a6a81b2a",
       "name": "¿El email se debe descartar?"
-    },
-    {
-      "parameters": {
-        "authentication": "oAuth2",
-        "select": "channel",
-        "channelId": {
-          "__rl": true,
-          "value": "C0C585H44R4",
-          "mode": "list",
-          "cachedResultName": "general-prueba"
-        },
-        "text": "El email pocesado tuvo un error, por favor revise el email y responda de forma manual",
-        "otherOptions": {}
-      },
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2.7,
-      "position": [
-        1600,
-        176
-      ],
-      "id": "e1f04cad-a349-4913-aa4d-7638df77411e",
-      "name": "Notificar error por slack",
-      "webhookId": "9e99a9b9-08f4-45d6-9483-b288ffbb6e2f",
-      "credentials": {
-        "slackOAuth2Api": {
-          "id": "uJuXnlSPdrwyHlKQ",
-          "name": "Slack account"
-        }
-      }
     },
     {
       "parameters": {
@@ -731,42 +650,16 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.7,
       "position": [
-        2672,
-        -64
+        2064,
+        -224
       ],
-      "id": "605c3305-c538-4591-b374-0a31e0b8094c",
+      "id": "e9fb9a96-f049-4f20-9fc9-02b1c546dbf0",
       "name": "Notificar finalizacion de poceso por slack",
       "webhookId": "9e99a9b9-08f4-45d6-9483-b288ffbb6e2f",
       "credentials": {
         "slackOAuth2Api": {
-          "id": "uJuXnlSPdrwyHlKQ",
+          "id": "7pFChpFypxKCfIgs",
           "name": "Slack account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "model": {
-          "__rl": true,
-          "value": "claude-sonnet-5-5",
-          "mode": "list",
-          "cachedResultName": "Claude Sonnet 5.5"
-        },
-        "options": {}
-      },
-      "id": "7dbc1a4d-22e2-469d-8ad9-44ef9a470dad",
-      "name": "IA model Clasificación",
-      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
-      "typeVersion": 1.6,
-      "position": [
-        992,
-        192
-      ],
-      "credentials": {
-        "anthropicApi": {
-          "id": null,
-          "name": "",
-          "__aiGatewayManaged": true
         }
       }
     },
@@ -786,15 +679,15 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.7,
       "position": [
-        2224,
-        128
+        1616,
+        -32
       ],
-      "id": "454240a8-17a3-42d2-b2b1-62306e944574",
+      "id": "42b74666-ad33-4cd2-83f0-7b82987e250e",
       "name": "Notificar rechazo de respuesta por slack",
       "webhookId": "9e99a9b9-08f4-45d6-9483-b288ffbb6e2f",
       "credentials": {
         "slackOAuth2Api": {
-          "id": "uJuXnlSPdrwyHlKQ",
+          "id": "7pFChpFypxKCfIgs",
           "name": "Slack account"
         }
       }
@@ -809,14 +702,14 @@
       "type": "n8n-nodes-base.hubspot",
       "typeVersion": 2.2,
       "position": [
-        176,
-        -16
+        -32,
+        -192
       ],
-      "id": "aedffe17-ab74-4e6b-b081-ca7232567596",
+      "id": "87a78067-2423-4427-9f9f-81559056a529",
       "name": "Registrar o actualizar nuevo cliente en Hubspot",
       "credentials": {
         "hubspotOAuth2Api": {
-          "id": "uas6AW4m2KkCAbJg",
+          "id": "mvGI5X7Fq6jAGP0l",
           "name": "HubSpot account"
         }
       }
@@ -861,7 +754,7 @@
       "main": [
         [
           {
-            "node": "Clasificar email",
+            "node": "Call consultas varias",
             "type": "main",
             "index": 0
           }
@@ -875,30 +768,11 @@
         ]
       ]
     },
-    "Clasificar email": {
-      "main": [
-        [
-          {
-            "node": "Call consultas varias",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mensaje de error classifier",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
-      ]
-    },
     "Crear registro de cliente": {
       "main": [
         [
           {
-            "node": "Clasificar email",
+            "node": "Call consultas varias",
             "type": "main",
             "index": 0
           }
@@ -978,34 +852,12 @@
         ]
       ]
     },
-    "Mensaje de error classifier": {
-      "main": [
-        [
-          {
-            "node": "Notificar error por slack",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Enviar respuesta al cliente": {
       "main": [
         [
           {
             "node": "Notificar finalizacion de poceso por slack",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "IA model Clasificación": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "Clasificar email",
-            "type": "ai_languageModel",
             "index": 0
           }
         ]
@@ -1028,12 +880,12 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "bae0fcb5-2f0c-4f41-ab43-8bff77caa32c",
+  "versionId": "581b74de-fd49-4296-a27e-a8ff20fe98ad",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "8fc55d931d612b2472d3a592d83eadb0d1dc959b4c0a351820f0c589755f63a0"
+    "instanceId": "8943d81c84d326c9f56af9333a76639c571c7c8ea908928439819030b326fcdb"
   },
   "nodeGroups": [],
-  "id": "PxxMwackZHRWP3OI",
+  "id": "uNYA09RjDixd5eJG",
   "tags": []
 }
