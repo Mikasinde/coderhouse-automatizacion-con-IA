@@ -134,7 +134,7 @@
             {
               "id": "1d373e93-8aa1-4ab4-ab57-22b114f790c6",
               "name": "mensaje",
-              "value": "={{ $json.text }}",
+              "value": "={{ $('transcribir audio a texto').item.json.text }}",
               "type": "string"
             },
             {
@@ -156,7 +156,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        1632,
+        1616,
         -240
       ],
       "id": "d86ec56b-9657-43d5-b093-8c6a0a88ce59",
@@ -171,7 +171,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1392,
+        1376,
         -64
       ],
       "id": "4b72d20b-0c3c-4ef3-a3d2-c1edf5e78548",
@@ -277,7 +277,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.4,
       "position": [
-        2096,
+        2080,
         96
       ],
       "id": "32a5b43c-6085-401c-8553-0000bf906ca9",
@@ -306,7 +306,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        1904,
+        1888,
         96
       ],
       "id": "b8b52b31-d7e5-48df-9801-3beb2ddb1d20",
@@ -328,7 +328,7 @@
       "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
       "typeVersion": 1,
       "position": [
-        2288,
+        2272,
         96
       ],
       "id": "ad4c595d-7e54-45ad-ac59-aab18ea4311e",
@@ -338,7 +338,8 @@
           "id": "3ThqIjSrJUTTE9bJ",
           "name": "ElevenLabs account 2"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -385,8 +386,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2480,
-        96
+        2672,
+        80
       ],
       "id": "4840e6c5-90d3-452b-b8cc-49807f2e2a87",
       "name": "Enviar el audio de respuesta",
@@ -407,7 +408,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1392,
+        1376,
         -240
       ],
       "id": "3d943913-4f6b-4fca-9082-6e9755d927c0",
@@ -448,7 +449,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.4,
       "position": [
-        1152,
+        1136,
         -224
       ],
       "id": "faad03b3-7199-4250-a7bb-351e2fb0163c",
@@ -627,7 +628,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "96f2cbde-7485-4f9e-aa00-669117de6501",
+  "versionId": "547e8b2e-dad5-40b2-b1f9-fe742af5824b",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8943d81c84d326c9f56af9333a76639c571c7c8ea908928439819030b326fcdb"

@@ -5,9 +5,7 @@
       "parameters": {
         "pollTimes": {
           "item": [
-            {
-              "hour": 9
-            }
+            {}
           ]
         },
         "filters": {}
@@ -880,7 +878,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "581b74de-fd49-4296-a27e-a8ff20fe98ad",
+  "versionId": "34c90456-5781-48ae-9650-ccbf43ab9ee3",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "8943d81c84d326c9f56af9333a76639c571c7c8ea908928439819030b326fcdb"
